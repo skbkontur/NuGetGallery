@@ -347,6 +347,7 @@ namespace NuGetGallery
                 using (Stream uploadStream = packageToPush.GetStream())
                 {
                     await PackageFileService.SavePackageFileAsync(package, uploadStream);
+                    IndexingService.UpdatePackage(package);
                 }
             }
 
