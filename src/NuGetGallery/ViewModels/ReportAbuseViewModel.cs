@@ -63,7 +63,7 @@ namespace NuGetGallery
         [Display(Name = "Your Email Address")]
         //[DataType(DataType.EmailAddress)] - does not work with client side validation
         [RegularExpression(RegisterViewModel.EmailValidationRegex,
-            ErrorMessage = "This doesn't appear to be a valid email address.")]
+            ErrorMessage = "This doesn't appear to be a valid email address. You should use @skbkontur.ru email only.")]
         public string Email { get; set; }
 
         public bool ConfirmedUser { get; set; }

@@ -65,10 +65,10 @@ namespace NuGetGallery
         //  * Addresses with quoted (" or ') first parts
         //  * Addresses with IP Address second parts (foo@[127.0.0.1])
         internal const string FirstPart = @"[-A-Za-z0-9!#$%&'*+\/=?^_`{|}~\.]+";
-        internal const string SecondPart = @"[A-Za-z0-9]+[\w\.-]*[A-Za-z0-9]*\.[A-Za-z0-9][A-Za-z\.]*[A-Za-z]";
+        internal const string SecondPart = @"skbkontur\.ru";
         internal const string EmailValidationRegex = "^" + FirstPart + "@" + SecondPart + "$";
 
-        internal const string EmailValidationErrorMessage = "This doesn't appear to be a valid email address.";
+        internal const string EmailValidationErrorMessage = "This doesn't appear to be a valid email address. You should use @skbkontur email only.";
 
         internal const string UsernameValidationRegex =
             @"[A-Za-z0-9][A-Za-z0-9_\.-]+[A-Za-z0-9]";
