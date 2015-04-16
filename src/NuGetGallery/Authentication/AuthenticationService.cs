@@ -46,8 +46,7 @@ namespace NuGetGallery.Authentication
             Auditing = auditing;
             Trace = diagnostics.SafeGetSource("AuthenticationService");
             Authenticators = providers.ToDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase);
-        }
-
+        }       
         public virtual async Task<AuthenticatedUser> Authenticate(string userNameOrEmail, string password)
         {
             using (Trace.Activity("Authenticate:" + userNameOrEmail))
@@ -99,19 +98,18 @@ namespace NuGetGallery.Authentication
                         Trace.Information("Password change failed: " + userNameOrEmail);
                         return null;
                     }
+                    var passwordCredentials = user
+                        .Credentials
+                        .Where(c => c.Type.StartsWith(CredentialTypes.Password.Prefix, StringComparison.OrdinalIgnoreCase))
+                        .ToList();
+                    if (passwordCredentials.Count > 1 || !passwordCredentials.Any(c => String.Equals(c.Type, CredentialTypes.Password.Pbkdf2, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        await MigrateCredentials(user, passwordCredentials, password);
+                    }
 
-                        var passwordCredentials = user
-                            .Credentials
-                            .Where(c => c.Type.StartsWith(CredentialTypes.Password.Prefix, StringComparison.OrdinalIgnoreCase))
-                            .ToList();
-                        if (passwordCredentials.Count > 1 || !passwordCredentials.Any(c => String.Equals(c.Type, CredentialTypes.Password.Pbkdf2, StringComparison.OrdinalIgnoreCase)))
-                        {
-                            await MigrateCredentials(user, passwordCredentials, password);
-                        }
-
-                        // Return the result
-                        Trace.Verbose("Successfully authenticated '" + user.Username + "' with '" + matched.Type + "' credential");
-                        return new AuthenticatedUser(user, matched);
+                    // Return the result
+                    Trace.Verbose("Successfully authenticated '" + user.Username + "' with '" + matched.Type + "' credential");
+                    return new AuthenticatedUser(user, matched);
                     
                 }
             }

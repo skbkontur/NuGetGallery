@@ -28,16 +28,16 @@
             @Html.ValidationMessageFor(m => m.SignIn.Password)
         </div>
 
-        <p id="signIn-lostpassword">
+        <!--<p id="signIn-lostpassword">
             @Html.ActionLink("Lost your Password?", "ForgotPassword", "Users")
-        </p>
+        </p>-->
 
         <img src="@Url.Content("~/Content/images/required.png")" alt="Blue border on left means required." />
 
 
         <button id="signin-link" class="btn btn-big" type="submit" title="Sign in">
             <i class="signin-authprovider-icon nucon-nuget-w"></i>
-            Sign in with @@skbkontur account
+            Sign in with your Kontur account
         </button>
     </fieldset>
 }

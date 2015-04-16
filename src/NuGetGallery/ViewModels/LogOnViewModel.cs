@@ -38,8 +38,8 @@ namespace NuGetGallery
     public class SignInViewModel
     {
         [Required]
-        [Display(Name = "Username or Email")]
-        [Hint("Enter your username or email address.")]
+        [Display(Name = "Username")]
+        [Hint("Enter your username")]
         public string UserNameOrEmail { get; set; }
 
         [Required]
