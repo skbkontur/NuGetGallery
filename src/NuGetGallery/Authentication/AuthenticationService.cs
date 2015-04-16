@@ -15,6 +15,8 @@ using System.Web.Mvc;
 using System.Threading.Tasks;
 using NuGetGallery.Auditing;
 using System.DirectoryServices;
+//using NuGetGallery.Configuration;
+
 namespace NuGetGallery.Authentication
 {
     public class AuthenticationService
@@ -22,7 +24,7 @@ namespace NuGetGallery.Authentication
         public IEntitiesContext Entities { get; private set; }
         public IAppConfiguration Config { get; private set; }
         public IDictionary<string, Authenticator> Authenticators { get; private set; }
-        public AuditingService Auditing { get; private set; }
+        public AuditingService Auditing { get; private set; }        
 
         private IDiagnosticsSource Trace { get; set; }
 
@@ -49,11 +51,13 @@ namespace NuGetGallery.Authentication
         }       
         public virtual async Task<AuthenticatedUser> Authenticate(string userNameOrEmail, string password)
         {
+            
             using (Trace.Activity("Authenticate:" + userNameOrEmail))
             {
+                //Config.
                 var user = FindByUserNameOrEmail(userNameOrEmail);
-                var AuthTest = new LdapAuthentication("LDAP://kontur");
-                string domain = "kontur";
+                var AuthTest = new LdapAuthentication(Config.LDAPPath);
+                string domain = Config.LDAPDomain;
                 var cred = CredentialBuilder.CreatePbkdf2Password(password);
                 // Check if the user exists
                 if (user == null)

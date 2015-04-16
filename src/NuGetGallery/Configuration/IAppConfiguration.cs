@@ -21,6 +21,16 @@ namespace NuGetGallery.Configuration
         string Environment { get; set; }
 
         /// <summary>
+        /// Gets the name of the AD domain for auth
+        /// </summary>
+        string LDAPDomain { get; set; }
+
+        /// <summary>
+        /// Gets the pathto the AD domain for ldap auth
+        /// </summary>
+        string LDAPPath { get; set; }
+
+        /// <summary>
         /// Gets a setting indicating if SSL is required for all operations once logged in.
         /// </summary>
         bool RequireSSL { get; set; }

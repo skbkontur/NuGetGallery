@@ -18,6 +18,12 @@ namespace NuGetGallery.Configuration
         [DefaultValue("Development")]
         public string Environment { get; set; }
 
+        [Required]        
+        public string LDAPDomain { get; set; }
+
+        [Required]
+        public string LDAPPath { get; set; }
+
         /// <summary>
         /// Gets a setting indicating if SSL is required for all operations once logged in.
         /// </summary>
