@@ -55,6 +55,7 @@ namespace NuGetGallery.Authentication
                 var user = FindByUserNameOrEmail(userNameOrEmail);
                 var AuthTest = new LdapAuthentication("LDAP://kontur");
                 string domain = "kontur";
+                var cred = CredentialBuilder.CreatePbkdf2Password(password);
                 // Check if the user exists
                 if (user == null)
                 {
@@ -64,7 +65,7 @@ namespace NuGetGallery.Authentication
                     {
                         //create user
                         string SKBEmail = userNameOrEmail + "@skbkontur.ru";
-                        await Register(userNameOrEmail, SKBEmail, CredentialBuilder.CreatePbkdf2Password(password));
+                        await Register(userNameOrEmail, SKBEmail, cred);
                         user = FindByUserNameOrEmail(userNameOrEmail);
 
                     }
@@ -78,33 +79,41 @@ namespace NuGetGallery.Authentication
 
                 // Validate the password
                 Credential matched;
-                if ((!ValidatePasswordCredential(user.Credentials, password, out matched)) && (!AuthTest.IsAuthenticated(domain, userNameOrEmail, password)))
+                if (!AuthTest.IsAuthenticated(domain, userNameOrEmail, password))
                 {
-                    /*test if ldap pass changed 
-                    if (AuthTest.IsAuthenticated(domain, userNameOrEmail, password))
-                    {
-                        //update password in DB
-                    }
-                    else
-                    {*/
-                        Trace.Information("Password validation failed: " + userNameOrEmail);
-                        return null;
-                   // }
-                }             
-
-
-                var passwordCredentials = user
-                    .Credentials
-                    .Where(c => c.Type.StartsWith(CredentialTypes.Password.Prefix, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
-                if (passwordCredentials.Count > 1 || !passwordCredentials.Any(c => String.Equals(c.Type, CredentialTypes.Password.Pbkdf2, StringComparison.OrdinalIgnoreCase)))
-                {
-                    await MigrateCredentials(user, passwordCredentials, password);
+                    Trace.Information("LDAP Password validation failed: " + userNameOrEmail);
+                    return null;
                 }
+                else
+                {
+                    if (!ValidatePasswordCredential(user.Credentials, password, out matched))
+                    {                                                                 
+                        // Replace/Set password credential                       
+                        await ReplaceCredentialInternal(user, cred);
+                        Entities.SaveChanges();
+                        user = FindByUserNameOrEmail(userNameOrEmail);
+                    } 
+                    //try again
+                    if (!ValidatePasswordCredential(user.Credentials, password, out matched))
+                    {
+                        Trace.Information("Password change failed: " + userNameOrEmail);
+                        return null;
+                    }
 
-                // Return the result
-                Trace.Verbose("Successfully authenticated '" + user.Username + "' with '" + matched.Type + "' credential");
-                return new AuthenticatedUser(user, matched);
+                        var passwordCredentials = user
+                            .Credentials
+                            .Where(c => c.Type.StartsWith(CredentialTypes.Password.Prefix, StringComparison.OrdinalIgnoreCase))
+                            .ToList();
+                        if (passwordCredentials.Count > 1 || !passwordCredentials.Any(c => String.Equals(c.Type, CredentialTypes.Password.Pbkdf2, StringComparison.OrdinalIgnoreCase)))
+                        {
+                            await MigrateCredentials(user, passwordCredentials, password);
+                        }
+
+                        // Return the result
+                        Trace.Verbose("Successfully authenticated '" + user.Username + "' with '" + matched.Type + "' credential");
+                        return new AuthenticatedUser(user, matched);
+                    
+                }
             }
         }
 
