@@ -63,12 +63,12 @@ namespace NuGetGallery.Authentication
                 if (user == null)
                 {
                     //if not exist, try to test ldap login
-
-                    if (AuthTest.IsAuthenticated(domain, userNameOrEmail, password))
+                    string Email = AuthTest.IsAuthenticated(domain, userNameOrEmail, password);
+                    if (!String.IsNullOrEmpty(Email))
                     {
                         //create user
-                        string SKBEmail = userNameOrEmail + "@skbkontur.ru";
-                        await Register(userNameOrEmail, SKBEmail, cred);
+                        string RegEmail = Email;
+                        await Register(userNameOrEmail, RegEmail, cred);
                         user = FindByUserNameOrEmail(userNameOrEmail);
 
                     }
@@ -82,7 +82,7 @@ namespace NuGetGallery.Authentication
 
                 // Validate the password
                 Credential matched;
-                if (!AuthTest.IsAuthenticated(domain, userNameOrEmail, password))
+                if (String.IsNullOrEmpty(AuthTest.IsAuthenticated(domain, userNameOrEmail, password)))
                 {
                     Trace.Information("LDAP Password validation failed: " + userNameOrEmail);
                     return null;
@@ -652,15 +652,14 @@ namespace NuGetGallery.Authentication
     //additional ldap classes
     public class LdapAuthentication
     {
-        private string _path;
-        private string _filterAttribute;
+        private string _path;        
 
         public LdapAuthentication(string path)
         {
             _path = path;
         }
 
-        public bool IsAuthenticated(string domain, string username, string pwd)
+        public string IsAuthenticated(string domain, string username, string pwd)
         {
             string domainAndUsername = domain + @"\" + username;
             DirectoryEntry entry = new DirectoryEntry(_path, domainAndUsername, pwd);
@@ -674,21 +673,20 @@ namespace NuGetGallery.Authentication
 
                 search.Filter = "(SAMAccountName=" + username + ")";
                 search.PropertiesToLoad.Add("cn");
+                search.PropertiesToLoad.Add("mail");
                 SearchResult result = search.FindOne();
 
                 if (null == result)
                 {
-                    return false;
+                    return null;
                 }
 
-                _path = result.Path;
-                _filterAttribute = (string)result.Properties["cn"][0];
-                return true;
+                return result.Properties["mail"][0].ToString();
             }
             catch 
             {
                 //throw new Exception("Error authenticating user. " + ex.Message);
-                return false;
+                return null;
             }
             
             
