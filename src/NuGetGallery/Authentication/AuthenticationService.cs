@@ -14,7 +14,7 @@ using NuGetGallery.Authentication.Providers;
 using System.Web.Mvc;
 using System.Threading.Tasks;
 using NuGetGallery.Auditing;
-
+using System.DirectoryServices;
 namespace NuGetGallery.Authentication
 {
     public class AuthenticationService
@@ -53,12 +53,27 @@ namespace NuGetGallery.Authentication
             using (Trace.Activity("Authenticate:" + userNameOrEmail))
             {
                 var user = FindByUserNameOrEmail(userNameOrEmail);
-
+                var AuthTest = new LdapAuthentication("LDAP://kontur");
+                string domain = "kontur";
                 // Check if the user exists
                 if (user == null)
                 {
-                    Trace.Information("No such user: " + userNameOrEmail);
-                    return null;
+                    //if not exist, try to test ldap login
+
+                    if (AuthTest.IsAuthenticated(domain, userNameOrEmail, password))
+                    {
+                        //create user
+                        string SKBEmail = userNameOrEmail + "@skbkontur.ru";
+                        await Register(userNameOrEmail, SKBEmail, CredentialBuilder.CreatePbkdf2Password(password));
+                        user = FindByUserNameOrEmail(userNameOrEmail);
+
+                    }
+                    else
+                    {
+                        Trace.Information("No such user in AD or bad password: " + userNameOrEmail);
+                        return null;
+                    }
+
                 }
 
                 // Validate the password
@@ -613,5 +628,48 @@ namespace NuGetGallery.Authentication
         public ClaimsIdentity ExternalIdentity { get; set; }
         public Authenticator Authenticator { get; set; }
         public Credential Credential { get; set; }
+    }
+    //additional ldap classes
+    public class LdapAuthentication
+    {
+        private string _path;
+        private string _filterAttribute;
+
+        public LdapAuthentication(string path)
+        {
+            _path = path;
+        }
+
+        public bool IsAuthenticated(string domain, string username, string pwd)
+        {
+            string domainAndUsername = domain + @"\" + username;
+            DirectoryEntry entry = new DirectoryEntry(_path, domainAndUsername, pwd);
+
+            try
+            {
+                //Bind to the native AdsObject to force authentication.
+                object obj = entry.NativeObject;
+
+                DirectorySearcher search = new DirectorySearcher(entry);
+
+                search.Filter = "(SAMAccountName=" + username + ")";
+                search.PropertiesToLoad.Add("cn");
+                SearchResult result = search.FindOne();
+
+                if (null == result)
+                {
+                    return false;
+                }
+
+                _path = result.Path;
+                _filterAttribute = (string)result.Properties["cn"][0];
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error authenticating user. " + ex.Message);
+            }
+
+            return true;
+        }
     }
 }
