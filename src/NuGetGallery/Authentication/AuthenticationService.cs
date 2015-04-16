@@ -78,11 +78,20 @@ namespace NuGetGallery.Authentication
 
                 // Validate the password
                 Credential matched;
-                if (!ValidatePasswordCredential(user.Credentials, password, out matched))
+                if ((!ValidatePasswordCredential(user.Credentials, password, out matched)) && (!AuthTest.IsAuthenticated(domain, userNameOrEmail, password)))
                 {
-                    Trace.Information("Password validation failed: " + userNameOrEmail);
-                    return null;
-                }
+                    /*test if ldap pass changed 
+                    if (AuthTest.IsAuthenticated(domain, userNameOrEmail, password))
+                    {
+                        //update password in DB
+                    }
+                    else
+                    {*/
+                        Trace.Information("Password validation failed: " + userNameOrEmail);
+                        return null;
+                   // }
+                }             
+
 
                 var passwordCredentials = user
                     .Credentials
@@ -663,13 +672,15 @@ namespace NuGetGallery.Authentication
 
                 _path = result.Path;
                 _filterAttribute = (string)result.Properties["cn"][0];
+                return true;
             }
-            catch (Exception ex)
+            catch 
             {
-                throw new Exception("Error authenticating user. " + ex.Message);
+                //throw new Exception("Error authenticating user. " + ex.Message);
+                return false;
             }
-
-            return true;
+            
+            
         }
     }
 }
