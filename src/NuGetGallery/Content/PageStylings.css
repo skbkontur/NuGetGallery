@@ -258,6 +258,7 @@ button.undo-button {
         }
 
             .featured div p.sub {
+                text-align:center;
                 font-size: 1.4em;
                 line-height: 1.3em;
                 align-content: center
@@ -265,8 +266,10 @@ button.undo-button {
             .featured div p.url
             {   
                 text-align:center;
-                font-size: 1em;
-                line-height: 0.9em
+                font-size: 1.2em;
+                line-height: 1.0em;                
+                font-family: Courier;
+                
             }
         
         .featured div a.install { 
