@@ -74,7 +74,7 @@
                 <li><a href="@Model.LicenseUrl" title="Make sure you agree with the license">License</a></li>
             }
             <li><a href="@Url.Action(actionName: "ContactOwners", controllerName: "Packages", routeValues: new { id = Model.Id })" title="Ask the package owners a question">Contact Owners</a></li>
-            @if (Model.IsOwner(User))
+           @*  @if (Model.IsOwner(User))
             {
                 <li><a href="@Url.Action(actionName: "ReportMyPackage", controllerName: "Packages", routeValues: new { id = Model.Id, version = Model.Version })" title="Contact the NuGet team for help with your package">
                         Contact Support</a></li>
@@ -83,7 +83,7 @@
             {
                 <li><a href="@Url.Action(actionName: "ReportAbuse", controllerName: "Packages", routeValues: new { id = Model.Id, version = Model.Version })" title="Report the package as abusive">
                         Report Abuse</a></li>
-            }
+            } *@
 
             <li><a href="@Url.PackageDownload(2, Model.Id, Model.Version)" title="Download the raw nupkg file.">Download</a> <a href="@Url.Action(actionName: "Download", controllerName: "Packages")" title="How do I download?">(how-to)</a></li>
             <li><a class="s-clickonce" href="@Url.ExplorerDeepLink(2, Model.Id, Model.Version)" title="Explore the nupkg with the NuGet Package Explorer (IE only)">Open in Package Explorer</a></li>
