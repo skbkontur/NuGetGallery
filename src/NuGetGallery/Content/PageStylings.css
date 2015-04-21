@@ -235,12 +235,15 @@ button.undo-button {
     border-radius: 3px;
     margin: 10px auto;
     padding: 20px 10px 0 10px;
+    height: 400px;
+    position: relative;
 }
 
     .featured div {
         float: left;
         margin-right: 5px;
-        width: 410px;
+        width: 100%;
+       
     }
 
         .featured div h1 {
@@ -257,9 +260,17 @@ button.undo-button {
             .featured div p.sub {
                 font-size: 1.4em;
                 line-height: 1.3em;
+                align-content: center
             }
-
-        .featured div a.install {
+            .featured div p.url
+            {   
+                text-align:center;
+                font-size: 1em;
+                line-height: 0.9em
+            }
+        
+        .featured div a.install { 
+                     
             -moz-border-radius: 4px;
             -webkit-border-radius: 4px;
             background-color: #4585aa;
@@ -275,8 +286,11 @@ button.undo-button {
             font-size: 2em;
             line-height: 2em;
             margin-top: 25px;
-            text-align: center;
-            width: 95%;
+            margin-left:25%;
+            text-align: center;            
+            width: 50%;
+            position:absolute;
+            bottom: 20px;
         }
 
             .featured div a.install:hover {
