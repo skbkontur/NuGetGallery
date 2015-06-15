@@ -30,6 +30,9 @@ namespace NuGetGallery
             
             // Configure logging
             app.SetLoggerFactory(new DiagnosticsLoggerFactory());
+			
+			// Remove X-AspNetMvc-Version header
+            System.Web.Mvc.MvcHandler.DisableMvcResponseHeader = true;
 
             if (config.Current.RequireSSL)
             {
